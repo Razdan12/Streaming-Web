@@ -1,0 +1,273 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         String       @id @default(cuid())
+  name       String?
+  email      String?      @unique
+  password   String?
+  role       String?
+  idPaket    String?
+  aktif      DateTime?
+  status     String?
+  createdAt  DateTime     @default(now()) @db.Timestamp(6)
+  akun       Akun[]
+  notifikasi Notifikasi[]
+  transaksi  Transaksi[]
+  siplah     UserSiplah[]
+
+  paket Paket? @relation(fields: [idPaket], references: [id])
+}
+
+model Paket {
+  id         String       @id @default(cuid())
+  name       String?
+  masaAktif  Int?
+  harga      Int?
+  kapasitas  Int?
+  register   Boolean?
+  userCreate Boolean?
+  createdAt  DateTime?    @default(now())
+  updatedAt  DateTime?    @updatedAt
+  SiplahCode SiplahCode[]
+  transaksi  Transaksi[]
+  users      User[]
+}
+
+model Akun {
+  id        String    @id @default(cuid())
+  idUser    String
+  name      String?
+  picture   String?
+  status    Boolean?
+  updatedAt DateTime? @updatedAt
+  user      User      @relation(fields: [idUser], references: [id])
+}
+
+
+
+model Transaksi {
+  id              String       @id @default(cuid())
+  idUser          String
+  idPaket         String
+  invoiceNumber   String
+  status          String?
+  metodeBayar     String?
+  nomorPembayaran String?
+  totalBayar      Int?
+  idPayment       String?
+  tanggalBayar    DateTime?
+  expiredDate     DateTime?
+  externalId      String?      @unique
+  idCallBack      String?
+  siplah          UserSiplah[]
+  createdAt       DateTime?    @default(now())
+  updatedAt       DateTime?    @updatedAt
+  paket           Paket        @relation(fields: [idPaket], references: [id])
+  user            User         @relation(fields: [idUser], references: [id])
+}
+
+model Kategori {
+  id          String          @id @default(cuid())
+  Name        String
+  kategoriFor String?
+  noKategori  Int?
+  aktif       Boolean?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  musik       MusikKategori[]
+  video       VideoKategori[]
+}
+model Video {
+  id            String          @id @default(cuid())
+  name          String?
+  deskripsi     String?
+  url           String
+  thumbnail     String?
+  namaFIle      String?
+  idPaketVid    String?
+  paket         Paket_video?    @relation(fields: [idPaketVid], references: [id])
+  rating        Rating_Video[]
+  createdAt     DateTime?       @default(now())
+  videoJenjang  VideoJenjang[]
+  videoKategori VideoKategori[]
+}
+
+model VideoJenjang {
+  videoId   String
+  jenjangId String
+  video     Video   @relation(fields: [videoId], references: [id])
+  jenjang   Jenjang @relation(fields: [jenjangId], references: [id])
+
+  @@id([videoId, jenjangId])
+}
+
+model VideoKategori {
+  videoId    String
+  kategoriId String
+  video      Video    @relation(fields: [videoId], references: [id])
+  kategori   Kategori @relation(fields: [kategoriId], references: [id])
+
+  @@id([videoId, kategoriId])
+}
+
+model Jenjang {
+  id    String         @id @default(cuid())
+  name  String
+  video VideoJenjang[]
+  musik MusikJenjang[]
+}
+
+model Musik {
+  id            String          @id @default(cuid())
+  name          String?
+  deskripsi     String?
+  url           String?
+  thumbnail     String?
+  durasi        String?
+  lirik         String?
+  idPaketMusik  String?
+  namaFile      String?
+  paket         Paket_musik?    @relation(fields: [idPaketMusik], references: [id])
+  rating        Rating_Musik[]
+  createdAt     DateTime?       @default(now())
+  musikJenjang  MusikJenjang[]
+  musikKategori MusikKategori[]
+}
+
+model MusikJenjang {
+  musikId   String
+  jenjangId String
+  musik     Musik   @relation(fields: [musikId], references: [id])
+  jenjang   Jenjang @relation(fields: [jenjangId], references: [id])
+
+  @@id([musikId, jenjangId])
+}
+
+model MusikKategori {
+  musikId    String
+  kategoriId String
+  musik      Musik    @relation(fields: [musikId], references: [id])
+  kategori   Kategori @relation(fields: [kategoriId], references: [id])
+
+  @@id([musikId, kategoriId])
+}
+
+model Faq {
+  id        String    @id @default(cuid())
+  question  String?
+  answer    String?
+  createdAt DateTime? @default(now())
+  updatedAt DateTime? @updatedAt
+}
+
+model Rating_Video {
+  id        String   @id @default(cuid())
+  review    String
+  ratting   Int
+  idVideo   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  video     Video    @relation(fields: [idVideo], references: [id])
+}
+
+model Rating_Musik {
+  id        String   @id @default(cuid())
+  review    String
+  ratting   Int
+  idMusik   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  musik     Musik    @relation(fields: [idMusik], references: [id])
+}
+
+model Paket_video {
+  id        String    @id @default(cuid())
+  name      String
+  video     Video[]
+  createdAt DateTime? @default(now())
+}
+
+model Paket_musik {
+  id        String    @id @default(cuid())
+  name      String
+  musik     Musik[]
+  createdAt DateTime? @default(now())
+}
+
+model Notifikasi {
+  id       String @id @default(cuid())
+  pesan    String
+  kategori String
+  idUser   String
+  user     User   @relation(fields: [idUser], references: [id])
+}
+
+model SiplahCode {
+  id         String       @id @default(cuid())
+  idPaket    String
+  kodeSiplah String       @unique
+  avail      Boolean?
+  kuota      Int?
+  sisaKuota  Int?
+  methode    String?
+  createdAt  DateTime?    @default(now())
+  paket      Paket        @relation(fields: [idPaket], references: [id])
+  userSiplah UserSiplah[]
+}
+
+model UserSiplah {
+  id           String     @id @default(cuid())
+  KodeSiplah String
+  idUser       String?
+  namaInstansi String?
+  kodeSiplah   SiplahCode @relation(fields: [KodeSiplah], references: [kodeSiplah])
+  status       String?
+  invoice      String?
+  noHp         String?
+  alamat       String?
+  createdAt    DateTime?  @default(now())
+  idTransaksi  String?
+  transaksi    Transaksi? @relation(fields: [idTransaksi], references: [id])
+  user         User?      @relation(fields: [idUser], references: [id])
+}
+
+model Voucher {
+  id         String    @id @default(cuid())
+  name       String?
+  deskripsi  String?
+  requirment Int
+  diskon     Int?
+  status     Boolean?
+  kode       String    @unique
+  mulai      DateTime?
+  berakhir   DateTime?
+  digunakan  Int?
+  pengguna   String[]
+  createdAt  DateTime? @default(now())
+}
+
+model Banner {
+  id         String    @id @default(cuid())
+  url        String
+  judul      String?
+  deskripsi  String?
+  aktif      Boolean?
+  urutan     Int?
+  jenis      String?
+  idProduk   String?
+  namaProduk String?
+  createdAt  DateTime? @default(now())
+}
+
+model Avatar {
+  id  String @id @default(cuid())
+  url String 
+  createdAt  DateTime? @default(now())
+}

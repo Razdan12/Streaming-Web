@@ -1,0 +1,13 @@
+/* Player.css */
+.custom-player .rhap_progress-filled {
+    background: linear-gradient(to right,  rgb(2, 215, 243), rgb(2, 78, 165)); /* change the color of the progress bar */
+  }
+  
+  .custom-player .rhap_progress-indicator {
+    background: linear-gradient(to top, rgb(2, 215, 243), rgb(0, 132, 255));
+  }
+  
+
+  .custom-player .rhap_time {
+    color: rgb(0, 255, 221); /* change the color of the time */
+  }
